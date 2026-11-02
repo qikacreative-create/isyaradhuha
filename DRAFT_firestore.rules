@@ -1,0 +1,101 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global Safety Net: Default-deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerified() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidStudentProgress(data) {
+      return data.keys().hasAll([
+          'uid',
+          'studentName',
+          'madrasahName',
+          'stars',
+          'characterName',
+          'hijabColor',
+          'hijabStyle',
+          'outfit',
+          'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'uid',
+          'studentName',
+          'madrasahName',
+          'stars',
+          'characterName',
+          'hijabColor',
+          'hijabStyle',
+          'outfit',
+          'updatedAt'
+        ])
+        && data.uid == request.auth.uid
+        && isValidId(data.uid)
+        && data.studentName is string && data.studentName.size() >= 1 && data.studentName.size() <= 100
+        && data.madrasahName is string && data.madrasahName.size() >= 1 && data.madrasahName.size() <= 120
+        && data.stars is number && data.stars >= 0 && data.stars <= 100000
+        && data.characterName is string && data.characterName.size() >= 1 && data.characterName.size() <= 60
+        && data.hijabColor is string && data.hijabColor.size() >= 4 && data.hijabColor.size() <= 20
+        && data.hijabStyle is string && data.hijabStyle.size() <= 40
+        && data.hijabStyle in ['bergo_sekolah', 'pashmina_santri', 'kerudung_rabbani', 'hijab_syari']
+        && data.outfit is string && data.outfit.size() <= 40
+        && data.outfit in ['mi_hijau', 'sd_merah', 'pramuka', 'batik', 'jas_lab']
+        && data.updatedAt == request.time;
+    }
+
+    match /studentProgress/{userId} {
+      allow get: if isOwner(userId) && isValidId(userId);
+      allow list: if isSignedIn() && resource.data.uid == request.auth.uid;
+
+      allow create: if isVerified()
+        && isOwner(userId)
+        && isValidId(userId)
+        && isValidStudentProgress(incoming());
+
+      allow update: if isVerified()
+        && isOwner(userId)
+        && isValidId(userId)
+        && isValidStudentProgress(incoming())
+        && incoming().uid == existing().uid
+        && (
+          incoming().diff(existing()).affectedKeys().hasOnly([
+            'studentName',
+            'madrasahName',
+            'stars',
+            'characterName',
+            'hijabColor',
+            'hijabStyle',
+            'outfit',
+            'updatedAt'
+          ])
+        );
+
+      allow delete: if isVerified() && isOwner(userId) && isValidId(userId);
+    }
+  }
+}

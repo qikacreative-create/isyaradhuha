@@ -1,0 +1,6 @@
+{
+  "name": "Bintang Belajar SD & MI",
+  "description": "Aplikasi edukasi interaktif untuk siswa SD dan MI: Bahasa Arab, Kaidah Imla', Hukum Tajwid, Matematika Kelas 2, Bahasa Indonesia Kelas 2, Bahasa Inggris, dan IPA Dasar.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

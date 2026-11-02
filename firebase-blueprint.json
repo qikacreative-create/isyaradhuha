@@ -1,0 +1,107 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Profil siswa dan data progres keseluruhan",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "ID autentikasi unik pengguna"
+        },
+        "email": {
+          "type": "string",
+          "description": "Alamat email pengguna"
+        },
+        "studentName": {
+          "type": "string",
+          "description": "Nama panggilan atau lengkap siswa",
+          "maxLength": 100
+        },
+        "madrasahName": {
+          "type": "string",
+          "description": "Nama sekolah atau madrasah",
+          "maxLength": 100
+        },
+        "stars": {
+          "type": "number",
+          "description": "Total akumulasi bintang yang dikumpulkan"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Waktu pembaruan profil terakhir"
+        }
+      },
+      "required": ["userId", "studentName", "stars"]
+    },
+    "LearningHistoryItem": {
+      "title": "LearningHistoryItem",
+      "description": "Catatan log riwayat belajar atau aktivitas game siswa",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "ID unik entri riwayat"
+        },
+        "userId": {
+          "type": "string",
+          "description": "ID pemilik riwayat"
+        },
+        "curriculumMode": {
+          "type": "string",
+          "enum": ["sd", "diniyah"],
+          "description": "Kategori kurikulum: Pelajaran SD Umum atau Diniyah Madrasah"
+        },
+        "activityType": {
+          "type": "string",
+          "description": "Jenis aktivitas (kuis, game-mengeja, game-perkalian, dll)"
+        },
+        "activityTitle": {
+          "type": "string",
+          "description": "Judul atau nama pelajaran yang dikerjakan",
+          "maxLength": 120
+        },
+        "score": {
+          "type": "number",
+          "description": "Skor perolehan siswa"
+        },
+        "totalQuestions": {
+          "type": "number",
+          "description": "Jumlah total soal/tantangan"
+        },
+        "starsEarned": {
+          "type": "number",
+          "description": "Bintang yang didapatkan pada sesi ini"
+        },
+        "accuracyPercent": {
+          "type": "number",
+          "description": "Persentase akurasi jawaban siswa"
+        },
+        "details": {
+          "type": "string",
+          "description": "Ringkasan hasil belajar atau keterangan pelengkap",
+          "maxLength": 300
+        },
+        "dateFormatted": {
+          "type": "string",
+          "description": "Tanggal pengerjaan dalam format lokal yang mudah dibaca"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Waktu pembuatan catatan riwayat"
+        }
+      },
+      "required": ["id", "userId", "curriculumMode", "activityType", "activityTitle", "score", "starsEarned"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "Koleksi profil dan progres siswa"
+    },
+    "/users/{userId}/history/{historyId}": {
+      "schema": "LearningHistoryItem",
+      "description": "Sub-koleksi riwayat aktivitas belajar siswa"
+    }
+  }
+}

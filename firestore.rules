@@ -1,0 +1,76 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Validation for User Profile
+    function isValidUserProfile(data) {
+      return data.userId is string && data.userId == request.auth.uid
+        && data.studentName is string && data.studentName.size() > 0 && data.studentName.size() <= 100
+        && (!('madrasahName' in data) || (data.madrasahName is string && data.madrasahName.size() <= 100))
+        && (!('email' in data) || (data.email is string && data.email.size() <= 120))
+        && data.stars is number && data.stars >= 0 && data.stars <= 100000;
+    }
+
+    // Validation for Learning History Item
+    function isValidLearningHistory(data) {
+      return data.id is string && data.id.size() > 0 && data.id.size() <= 128
+        && data.userId is string && data.userId == request.auth.uid
+        && data.curriculumMode is string && (data.curriculumMode == 'sd' || data.curriculumMode == 'diniyah')
+        && data.activityType is string && data.activityType.size() <= 50
+        && data.activityTitle is string && data.activityTitle.size() <= 150
+        && data.score is number && data.score >= 0 && data.score <= 10000
+        && data.starsEarned is number && data.starsEarned >= 0 && data.starsEarned <= 1000;
+    }
+
+    // User Profile Collection
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow list: if false; // Blanket listing forbidden
+      allow create: if isOwner(userId) && isValidId(userId) && isValidUserProfile(incoming());
+      allow update: if isOwner(userId) && isValidId(userId) && isValidUserProfile(incoming())
+        && incoming().userId == existing().userId;
+      allow delete: if isOwner(userId);
+
+      // Subcollection: Learning History
+      match /history/{historyId} {
+        allow get: if isOwner(userId);
+        allow list: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(userId) && isValidId(historyId) && isValidLearningHistory(incoming());
+        allow update: if isOwner(userId) && isValidId(userId) && isValidId(historyId) && isValidLearningHistory(incoming())
+          && incoming().userId == existing().userId;
+        allow delete: if isOwner(userId);
+      }
+    }
+
+    // Test connection doc for validation
+    match /test/{docId} {
+      allow read: if true;
+    }
+
+    // Global default-deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

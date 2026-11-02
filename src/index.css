@@ -1,0 +1,84 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+}
+
+.font-arabic {
+  font-family: 'Scheherazade New', 'Amiri', 'Traditional Arabic', serif;
+  direction: rtl;
+}
+
+.font-quran {
+  font-family: 'Amiri', 'Scheherazade New', serif;
+  direction: rtl;
+}
+
+/* Custom scrollbar for pleasant children learning interface */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* SMART TV 10-FOOT UI & REMOTE CONTROL STYLING */
+:focus-visible,
+.tv-active-focus {
+  outline: 4px solid #f59e0b !important;
+  outline-offset: 3px !important;
+  box-shadow: 0 0 0 5px rgba(245, 158, 11, 0.45), 0 10px 25px -5px rgba(0, 0, 0, 0.25) !important;
+  transform: scale(1.025);
+  transition: transform 0.12s cubic-bezier(0.16, 1, 0.3, 1), outline 0.12s ease, box-shadow 0.12s ease;
+  z-index: 25;
+}
+
+/* TV Mode: Enlarge typography and interactive controls for 3-4 meter living room distance */
+body.tv-mode {
+  font-size: 1.12rem;
+  line-height: 1.6;
+}
+
+body.tv-mode header {
+  padding-left: 2rem;
+  padding-right: 2rem;
+}
+
+body.tv-mode button,
+body.tv-mode [role="button"],
+body.tv-mode a {
+  min-height: 48px;
+  font-size: 0.95rem;
+}
+
+body.tv-mode .tv-card {
+  padding: 1.5rem !important;
+}
+
+body.tv-mode :focus-visible,
+body.tv-mode .tv-active-focus {
+  outline: 5px solid #f59e0b !important;
+  outline-offset: 4px !important;
+  box-shadow: 0 0 0 8px rgba(245, 158, 11, 0.5), 0 16px 36px rgba(0, 0, 0, 0.35) !important;
+  transform: scale(1.045);
+}
+
+/* TV Overscan Protection for edges */
+@media (min-width: 1024px) {
+  body.tv-mode main {
+    padding-left: max(2rem, env(safe-area-inset-left));
+    padding-right: max(2rem, env(safe-area-inset-right));
+  }
+}
+
+
